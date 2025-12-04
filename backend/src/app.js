@@ -39,6 +39,16 @@ app.use(devLogger);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '📖 Bienvenido a la API Tienda de Libros',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
+
 // Middleware para rate limiting
 app.use('/api/', limiter);
 

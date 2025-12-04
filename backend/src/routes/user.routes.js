@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/user.controller');
 const { authenticate, isAdmin } = require('../middlewares/auth.middleware');
+const userController = require('../controllers/user.controller');
+console.log(userController);
+console.log('authenticate:', authenticate);
+console.log('isAdmin:', isAdmin);
+
 
 // Rutas públicas
 router.post('/registro', userController.register);

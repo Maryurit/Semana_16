@@ -9,7 +9,7 @@ router.post('/register', authValidations.register, AuthController.register);
 router.post('/login', authValidations.login, AuthController.login);
 
 // Rutas protegidas
-router.get('/profile', authMiddleware.authenticateToken, AuthController.getProfile);
-router.put('/profile', authMiddleware.authenticateToken, AuthController.updateProfile);
+router.get('/profile', authMiddleware.authenticate, AuthController.getProfile);
+router.put('/profile', authMiddleware.authenticate, AuthController.updateProfile);
 
 module.exports = router;

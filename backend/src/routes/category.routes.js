@@ -5,8 +5,8 @@ const { authenticate, isAdmin } = require('../middlewares/auth.middleware');
 
 // Rutas públicas
 router.get('/', categoryController.getAllCategories);
-router.get('/:id', categoryController.getCategoryById);
 router.get('/slug/:slug', categoryController.getCategoryBySlug);
+router.get('/:id', categoryController.getCategoryById);
 
 // Rutas admin
 router.post('/', authenticate, isAdmin, categoryController.createCategory);

@@ -1,56 +1,55 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
-const { pool } = require('../config/database');
 
-const authenticate = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
+const authMiddleware = {
+  // Middleware para verificar token JWT
+  authenticate: (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Token no proporcionado. Debes iniciar sesión'
+        message: 'Token de autenticación requerido'
       });
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET);
-    
-    // Verificar que el usuario existe y está activo
-    const [users] = await pool.query(
-      'SELECT id_usuario, email, rol, activo FROM usuarios WHERE id_usuario = ?',
-      [decoded.id]
-    );
+    jwt.verify(token, env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.status(403).json({
+          success: false,
+          message: 'Token inválido o expirado'
+        });
+      }
 
-    if (users.length === 0 || !users[0].activo) {
-      return res.status(401).json({
+      req.user = user;
+      next();
+    });
+  },
+
+  // Middleware para verificar rol de admin
+  isAdmin: (req, res, next) => {
+    if (req.user.rol !== 'admin') {
+      return res.status(403).json({
         success: false,
-        message: 'Usuario no autorizado'
+        message: 'Acceso denegado. Se requieren permisos de administrador'
       });
     }
-
-    req.user = {
-      id: users[0].id_usuario,
-      email: users[0].email,
-      rol: users[0].rol
-    };
-    
     next();
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: 'Token inválido o expirado'
-    });
+  },
+
+  // Middleware para verificar que es el usuario mismo o admin
+  authorizeSelfOrAdmin: (req, res, next) => {
+    const requestedUserId = parseInt(req.params.userId || req.params.id);
+
+    if (req.user.rol !== 'admin' && req.user.id !== requestedUserId) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tienes permisos para acceder a este recurso'
+      });
+    }
+    next();
   }
 };
 
-const isAdmin = (req, res, next) => {
-  if (req.user.rol !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Acceso denegado. Se requieren permisos de administrador'
-    });
-  }
-  next();
-};
-
-module.exports = { authenticate, isAdmin };
+module.exports = authMiddleware;

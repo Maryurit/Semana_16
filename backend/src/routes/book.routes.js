@@ -7,8 +7,8 @@ const { authenticate, isAdmin } = require('../middlewares/auth.middleware');
 router.get('/', bookController.getAllBooks);
 router.get('/destacados', bookController.getFeaturedBooks);
 router.get('/buscar', bookController.searchBooks);
-router.get('/:id', bookController.getBookById);
 router.get('/slug/:slug', bookController.getBookBySlug);
+router.get('/:id', bookController.getBookById);
 router.get('/categoria/:id', bookController.getBooksByCategory);
 
 // Rutas admin
