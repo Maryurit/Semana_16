@@ -74,7 +74,7 @@ exports.createOrder = async (req, res) => {
     const total = subtotal + impuestos + costo_envio;
 
     // Crear pedido
-    const numero_pedido = generateOrderNumber();
+    const numero_pedido = `P${Date.now()}${Math.floor(Math.random() * 1000)}`; // Único y corto
 
     const [orderResult] = await connection.query(
       `INSERT INTO pedidos (numero_pedido, id_usuario, subtotal, impuestos, costo_envio, 
