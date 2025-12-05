@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -26,7 +26,8 @@ export const ordersAPI = {
       console.log('Headers:', headers);
       console.log('==================');
       
-      const response = await fetch(`${API_URL}/pedidos`, {
+      // Cambiado a /mis-pedidos
+      const response = await fetch(`${API_URL}/pedidos/mis-pedidos`, {
         method: 'GET',
         headers
       });
@@ -47,6 +48,7 @@ export const ordersAPI = {
       return { success: false, data: [], message: error.message };
     }
   },
+
 
   getById: async (id) => {
     try {
