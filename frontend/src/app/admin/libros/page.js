@@ -9,6 +9,7 @@ export default function AdminLibrosPage() {
   const router = useRouter();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hoveredRow, setHoveredRow] = useState(null);
 
   useEffect(() => {
     fetchBooks();
@@ -41,41 +42,214 @@ export default function AdminLibrosPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '48px 0',
+        fontSize: '1.125rem',
+        color: '#6b7280'
+      }}>
+        Cargando...
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800">📚 Gestión de Libros</h1>
-        <Button onClick={() => router.push('/admin/libros/nuevo')}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '32px'
+      }}>
+        <h1 style={{
+          fontSize: '2.25rem',
+          fontWeight: 'bold',
+          background: 'linear-gradient(135deg, #9333ea 0%, #ec4899 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          📚 Gestión de Libros
+        </h1>
+        <button
+          onClick={() => router.push('/admin/libros/nuevo')}
+          style={{
+            background: 'linear-gradient(135deg, #9333ea 0%, #ec4899 100%)',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '1rem',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 2px 4px rgba(147, 51, 234, 0.3)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(147, 51, 234, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(147, 51, 234, 0.3)';
+          }}
+        >
           + Nuevo Libro
-        </Button>
+        </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        overflow: 'hidden',
+        border: '2px solid #e5e7eb'
+      }}>
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse'
+        }}>
+          <thead style={{
+            backgroundColor: '#f9fafb',
+            borderBottom: '2px solid #e5e7eb'
+          }}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Título</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Autor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>ID</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Título</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Autor</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Precio</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Stock</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {books.map((book) => (
-              <tr key={book.id_libro} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{book.id_libro}</td>
-                <td className="px-6 py-4 font-medium">{book.titulo}</td>
-                <td className="px-6 py-4">{book.autor_nombre}</td>
-                <td className="px-6 py-4">{formatPrice(book.precio)}</td>
-                <td className="px-6 py-4">{book.stock}</td>
-                <td className="px-6 py-4">
+              <tr 
+                key={book.id_libro}
+                style={{
+                  borderBottom: '1px solid #e5e7eb',
+                  backgroundColor: hoveredRow === book.id_libro ? '#f9fafb' : 'white',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={() => setHoveredRow(book.id_libro)}
+                onMouseLeave={() => setHoveredRow(null)}
+              >
+                <td style={{
+                  padding: '16px 24px',
+                  color: '#6b7280',
+                  fontSize: '0.875rem'
+                }}>{book.id_libro}</td>
+                <td style={{
+                  padding: '16px 24px',
+                  fontWeight: '500',
+                  color: '#1f2937',
+                  fontSize: '0.875rem'
+                }}>{book.titulo}</td>
+                <td style={{
+                  padding: '16px 24px',
+                  color: '#6b7280',
+                  fontSize: '0.875rem'
+                }}>{book.autor_nombre}</td>
+                <td style={{
+                  padding: '16px 24px',
+                  color: '#1f2937',
+                  fontWeight: '600',
+                  fontSize: '0.875rem'
+                }}>{formatPrice(book.precio)}</td>
+                <td style={{
+                  padding: '16px 24px',
+                  fontSize: '0.875rem'
+                }}>
+                  <span style={{
+                    backgroundColor: book.stock > 0 ? '#dcfce7' : '#fee2e2',
+                    color: book.stock > 0 ? '#166534' : '#991b1b',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600'
+                  }}>
+                    {book.stock}
+                  </span>
+                </td>
+                <td style={{
+                  padding: '16px 24px'
+                }}>
                   <button
                     onClick={() => handleDelete(book.id_libro)}
-                    className="text-red-600 hover:text-red-800 font-medium"
+                    style={{
+                      color: '#dc2626',
+                      fontWeight: '500',
+                      fontSize: '0.875rem',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fee2e2';
+                      e.currentTarget.style.color = '#991b1b';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#dc2626';
+                    }}
                   >
-                    Eliminar
+                    🗑️ Eliminar
                   </button>
                 </td>
               </tr>

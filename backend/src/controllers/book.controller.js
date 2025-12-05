@@ -7,7 +7,34 @@ exports.getAllBooks = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const offset = (page - 1) * limit;
+    const { q } = req.query;
 
+    // Si hay un parámetro de búsqueda, realizar búsqueda
+    if (q) {
+      const searchTerm = `%${q}%`;
+      
+      const [books] = await pool.query(
+        `SELECT l.*, a.nombre as autor_nombre, e.nombre as editorial_nombre,
+                GROUP_CONCAT(c.nombre) as categorias
+         FROM libros l
+         LEFT JOIN autores a ON l.id_autor = a.id_autor
+         LEFT JOIN editoriales e ON l.id_editorial = e.id_editorial
+         LEFT JOIN libro_categorias lc ON l.id_libro = lc.id_libro
+         LEFT JOIN categorias c ON lc.id_categoria = c.id_categoria
+         WHERE l.activo = 1 AND (l.titulo LIKE ? OR a.nombre LIKE ? OR l.isbn LIKE ?)
+         GROUP BY l.id_libro
+         ORDER BY l.titulo ASC`,
+        [searchTerm, searchTerm, searchTerm]
+      );
+
+      return res.json({
+        success: true,
+        data: books,
+        total: books.length
+      });
+    }
+
+    // Si no hay búsqueda, devolver todos los libros con paginación
     const [books] = await pool.query(
       `SELECT l.*, a.nombre as autor_nombre, e.nombre as editorial_nombre,
               GROUP_CONCAT(c.nombre) as categorias
@@ -213,6 +240,52 @@ exports.getBooksByCategory = async (req, res) => {
     });
   } catch (error) {
     logger.error('Error en getBooksByCategory:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener libros por categoría'
+    });
+  }
+};
+
+// Obtener libros por slug de categoría
+exports.getBooksByCategorySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // Primero obtener la categoría por slug
+    const [categories] = await pool.query(
+      'SELECT id_categoria FROM categorias WHERE slug = ? AND activa = 1',
+      [slug]
+    );
+
+    if (categories.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Categoría no encontrada'
+      });
+    }
+
+    const categoryId = categories[0].id_categoria;
+
+    // Luego obtener los libros de esa categoría
+    const [books] = await pool.query(
+      `SELECT l.*, a.nombre as autor_nombre, e.nombre as editorial_nombre
+       FROM libros l
+       LEFT JOIN autores a ON l.id_autor = a.id_autor
+       LEFT JOIN editoriales e ON l.id_editorial = e.id_editorial
+       INNER JOIN libro_categorias lc ON l.id_libro = lc.id_libro
+       WHERE lc.id_categoria = ? AND l.activo = 1
+       ORDER BY l.titulo ASC`,
+      [categoryId]
+    );
+
+    res.json({
+      success: true,
+      data: books,
+      total: books.length
+    });
+  } catch (error) {
+    logger.error('Error en getBooksByCategorySlug:', error);
     res.status(500).json({
       success: false,
       message: 'Error al obtener libros por categoría'

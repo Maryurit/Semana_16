@@ -49,6 +49,86 @@ export const ordersAPI = {
     }
   },
 
+  // Admin: Obtener todos los pedidos
+  getAll: async () => {
+    try {
+      const response = await fetch(`${API_URL}/pedidos`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to fetch all orders:', response.status);
+        return { success: false, data: [], message: 'No se pudieron cargar los pedidos' };
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
+      return { success: false, data: [], message: error.message };
+    }
+  },
+
+  // Admin: Obtener estadísticas (puede ser implementado en el backend o calculado en frontend)
+  getStats: async () => {
+    try {
+      // Obtener pedidos
+      const ordersResponse = await fetch(`${API_URL}/pedidos`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      // Obtener libros
+      const booksResponse = await fetch(`${API_URL}/libros`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      // Obtener usuarios
+      const usersResponse = await fetch(`${API_URL}/usuarios`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      
+      let orders = [];
+      let books = [];
+      let users = [];
+      
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        orders = ordersData.data || [];
+      }
+      
+      if (booksResponse.ok) {
+        const booksData = await booksResponse.json();
+        books = booksData.data || booksData.libros || [];
+      }
+      
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        users = usersData.data || [];
+      }
+      
+      // Calcular estadísticas
+      const stats = {
+        totalPedidos: orders.length,
+        pendientes: orders.filter(o => o.estado === 'pendiente').length,
+        procesando: orders.filter(o => o.estado === 'procesando').length,
+        enviados: orders.filter(o => o.estado === 'enviado').length,
+        entregados: orders.filter(o => o.estado === 'entregado').length,
+        totalIngresos: orders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0),
+        totalLibros: books.length,
+        totalUsuarios: users.length,
+        ingresosTotales: orders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0)
+      };
+      
+      return { success: true, data: stats };
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      return { success: false, data: null };
+    }
+  },
 
   getById: async (id) => {
     try {
@@ -124,7 +204,7 @@ export const ordersAPI = {
   updateStatus: async (id, status) => {
     try {
       const response = await fetch(`${API_URL}/pedidos/${id}/estado`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ estado: status })
       });

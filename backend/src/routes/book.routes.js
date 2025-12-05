@@ -10,6 +10,7 @@ router.get('/buscar', bookController.searchBooks);
 router.get('/slug/:slug', bookController.getBookBySlug);
 router.get('/:id', bookController.getBookById);
 router.get('/categoria/:id', bookController.getBooksByCategory);
+router.get('/categoria/slug/:slug', bookController.getBooksByCategorySlug);
 
 // Rutas admin
 router.post('/', authenticate, isAdmin, bookController.createBook);
