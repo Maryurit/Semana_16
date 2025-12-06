@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend16.vercel.app/api';
 
 export const categoriesAPI = {
   // Obtener todas las categorías

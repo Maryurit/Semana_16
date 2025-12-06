@@ -1,5 +1,8 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -7,7 +10,7 @@ import BookGrid from '@/components/books/BookGrid';
 import SearchBar from '@/components/books/SearchBar';
 import { booksAPI } from '@/lib/api/books';
 
-export default function LibrosPage() {
+function LibrosContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q');
   
@@ -67,11 +70,14 @@ export default function LibrosPage() {
           }}>
             {query ? (
               <>
-                🔍 Resultados para: <span style={{ 
+                🔍 Resultados para:{" "}
+                <span style={{ 
                   color: '#fbbf24',
                   textDecoration: 'underline',
                   textDecorationColor: 'rgba(251, 191, 36, 0.5)'
-                }}>&ldquo;{query}&rdquo;</span>
+                }}>
+                  &ldquo;{query}&rdquo;
+                </span>
               </>
             ) : (
               '📚 Catálogo Completo de Libros'
@@ -106,13 +112,17 @@ export default function LibrosPage() {
               fontWeight: '600',
               margin: 0
             }}>
-              Se encontraron <span style={{ 
+              Se encontraron{" "}
+              <span style={{ 
                 backgroundColor: '#3b82f6',
                 color: 'white',
                 padding: '4px 12px',
                 borderRadius: '20px',
                 fontWeight: 'bold'
-              }}>{books.length}</span> resultados
+              }}>
+                {books.length}
+              </span>{" "}
+              resultados
             </p>
           </div>
         )}
@@ -133,7 +143,7 @@ export default function LibrosPage() {
               fontWeight: '600',
               marginBottom: '10px'
             }}>
-              No se encontraron resultados para &ldquo;{query}&rdquo;
+              No se encontraron resultados para “{query}”
             </p>
             <p style={{ 
               color: '#78350f',
@@ -149,5 +159,13 @@ export default function LibrosPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function LibrosPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <LibrosContent />
+    </Suspense>
   );
 }
